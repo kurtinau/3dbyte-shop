@@ -20,6 +20,10 @@ export const GET_PRODUCTS = gql`
         description
         shortDescription
         discountInPercent
+        weight
+        length_
+        width
+        height
         gallery {
           url
           formats
@@ -29,14 +33,26 @@ export const GET_PRODUCTS = gql`
           title
           slug
         }
-        Color{
-          value
-          stock
-          Image{
-            url
-            formats
+        variants{
+          __typename
+          ... on ComponentVariantColor{
+            value
+            stock
+            image {
+              url
+              formats
+            }
+          }
+          ... on ComponentVariantSize{
+            value
+            width
+            length_
+            height
+            weight
+            stock
           }
         }
+
       }
       hasMore
     }

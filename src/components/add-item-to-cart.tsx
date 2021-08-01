@@ -1,20 +1,20 @@
-import React from 'react';
-import styled from 'styled-components';
-import css from '@styled-system/css';
-import { useCart } from 'contexts/cart/use-cart';
-import { Counter } from './counter/counter';
-import { variant as _variant } from 'styled-system';
-import { Box } from './box';
+import React from "react";
+import styled from "styled-components";
+import css from "@styled-system/css";
+import { useCart } from "contexts/cart/use-cart";
+import { Counter } from "./counter/counter";
+import { variant as _variant } from "styled-system";
+import { Box } from "./box";
 const Icon = styled.span<any>(
   _variant({
     variants: {
       full: {
         px: 3,
         height: 36,
-        backgroundColor: '#e6e6e6',
-        display: 'flex',
-        transition: '0.35s ease-in-out',
-        alignItems: 'center',
+        backgroundColor: "#e6e6e6",
+        display: "flex",
+        transition: "0.35s ease-in-out",
+        alignItems: "center",
       },
     },
   })
@@ -24,34 +24,34 @@ const Button = styled.button<any>(
     width: 36,
     height: 36,
     borderRadius: 6,
-    transition: '0.35s ease-in-out',
-    backgroundColor: '#fff',
-    border: '1px solid',
-    borderColor: '#e6e6e6',
-    cursor: 'pointer',
-    ':hover': {
-      backgroundColor: 'primary.regular',
-      borderColor: 'primary.regular',
-      color: '#fff',
+    transition: "0.35s ease-in-out",
+    backgroundColor: "#fff",
+    border: "1px solid",
+    borderColor: "#e6e6e6",
+    cursor: "pointer",
+    ":hover": {
+      backgroundColor: "primary.regular",
+      borderColor: "primary.regular",
+      color: "#fff",
     },
   }),
   _variant({
     variants: {
       full: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: '#f3f3f3',
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#f3f3f3",
         padding: 0,
-        border: 'none',
-        overflow: 'hidden',
-        ':hover': {
-          backgroundColor: 'primary.hover',
-          borderColor: 'primary.hover',
-          color: '#fff',
+        border: "none",
+        overflow: "hidden",
+        ":hover": {
+          backgroundColor: "primary.hover",
+          borderColor: "primary.hover",
+          color: "#fff",
           [Icon]: {
-            backgroundColor: 'primary.regular',
-            color: '#fff',
+            backgroundColor: "primary.regular",
+            color: "#fff",
           },
         },
       },
@@ -69,11 +69,34 @@ export const AddItemToCart = ({ data, variant, buttonText }: Props) => {
   const { addItem, removeItem, getItem, isInCart } = useCart();
   const handleAddClick = (e) => {
     e.stopPropagation();
-    addItem(data);
+    const {
+      categories,
+      description,
+      gallery,
+      shortDescription,
+      variants,
+      ...itemToCart
+    } = data;
+    if (itemToCart.image.length > 1) {
+      itemToCart.image = itemToCart.image[0];
+    }
+    console.log("add item to cart::: ", itemToCart);
+    addItem(itemToCart);
   };
   const handleRemoveClick = (e) => {
     e.stopPropagation();
-    removeItem(data);
+    const {
+      categories,
+      description,
+      gallery,
+      shortDescription,
+      variants,
+      ...itemToCart
+    } = data;
+    if (itemToCart.image.length > 1) {
+      itemToCart.image = itemToCart.image[0];
+    }
+    removeItem(itemToCart);
   };
   return !isInCart(data.id) ? (
     <Button
@@ -104,7 +127,7 @@ export const AddItemToCart = ({ data, variant, buttonText }: Props) => {
       onDecrement={handleRemoveClick}
       onIncrement={handleAddClick}
       className="card-counter"
-      variant={variant || 'altHorizontal'}
+      variant={variant || "altHorizontal"}
     />
   );
 };

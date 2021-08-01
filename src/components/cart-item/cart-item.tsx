@@ -12,7 +12,8 @@ import {
   Total,
   RemoveButton,
 } from './cart-item.style';
-import {prependHostname} from 'utils/imageFormateUtil';
+import {prependHostname} from 'utils/imageFormatUtil';
+import ImageNotFound from 'assets/images/ImageNotFound.png';
 
 interface Props {
   data: any;
@@ -27,9 +28,8 @@ export const CartItem: React.FC<Props> = ({
   onIncrement,
   onRemove,
 }) => {
-  const { title, image, price, salePrice, gallery, quantity, variant } = data;
+  const { title, image, price, salePrice, quantity, variant } = data;
   const displayPrice = salePrice ? salePrice : price;
-  console.log('cart-item:image:: ', image);
   return (
     <ItemBox>
       <Counter
@@ -38,7 +38,7 @@ export const CartItem: React.FC<Props> = ({
         onIncrement={onIncrement}
         variant="lightVertical"
       />
-      <Image src={variant ? prependHostname(image.thumbnail) : prependHostname(image[0].thumbnail)} />
+      <Image src={image ? prependHostname(image.thumbnail) : ImageNotFound} />
       <Information>
         <Name>{title}</Name>
         <Price>

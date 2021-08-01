@@ -4,21 +4,38 @@ import {
   InMemoryCache,
   HttpLink,
   NormalizedCacheObject,
+  ApolloLink,
+  concat,
 } from '@apollo/client';
 
 let apolloClient: ApolloClient<NormalizedCacheObject> | undefined;
 
-function createIsomorphLink() {
-  return new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_API_ENDPOINT, // Server URL (must be absolute)
-    credentials: 'same-origin', // Additional fetch() options like `credentials` or `headers`
-  });
-}
+const createIsomorphLink =  new HttpLink({
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_API_ENDPOINT, // Server URL (must be absolute)
+  // credentials: 'same-origin', // Additional fetch() options like `credentials` or `headers`
+});
+
+// const authMiddleware = new ApolloLink((operation, forward) => {
+//   let token = '1';
+//   if (typeof window !== 'undefined') {
+//     token = localStorage.getItem('authToken');
+//   }
+//   // add the authorization to the headers
+//   operation.setContext(({ headers = {} }) => ({
+//     headers: {
+//       ...headers,
+//       authorization: 'Bearer '+ token,
+//     }
+//   }));
+
+//   return forward(operation);
+// })
 
 function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: createIsomorphLink(),
+    // link: concat(authMiddleware, createIsomorphLink),
+    link: createIsomorphLink,
     cache: new InMemoryCache({
       typePolicies: {
         Query: {

@@ -5,25 +5,21 @@ const INITIAL_STATE = {
   currentForm: 'signIn',
 };
 
-function reducer(state: any, action: any) {
-  console.log(state, 'auth');
-
+function reducer(state: any = INITIAL_STATE, action: any) {
   switch (action.type) {
     case 'SIGNIN':
       return {
         ...state,
         currentForm: 'signIn',
       };
-    case 'SIGNIN_SUCCESS':
-      return {
-        ...state,
-        isAuthenticated: true,
-      };
-    case 'SIGN_OUT':
-      return {
-        ...state,
-        isAuthenticated: false,
-      };
+    // case 'SIGNIN_SUCCESS':
+    //   return {
+    //     ...state,
+    //   };
+    // case 'SIGN_OUT':
+    //   return {
+    //     ...state,
+    //   };
     case 'SIGNUP':
       return {
         ...state,

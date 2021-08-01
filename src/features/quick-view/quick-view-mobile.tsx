@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
-import Router from 'next/router';
-// import { closeModal } from '@redq/reuse-modal';
-import { Button } from 'components/button/button';
-import Select from 'components/select/select';
+import React, { useEffect, useRef, useState } from "react";
+import Router from "next/router";
+import { Button } from "components/button/button";
+import Select from "components/select/select";
 import {
   QuickViewWrapper,
   ProductDetailsWrapper,
@@ -25,18 +24,20 @@ import {
   MetaItem,
   ModalClose,
   SoldOutSign,
-  OptionsWrapper
-} from './quick-view.style';
-import { CloseIcon } from 'assets/icons/CloseIcon';
-import { CartIcon } from 'assets/icons/CartIcon';
-import { CURRENCY } from 'utils/constant';
+  OptionsWrapper,
+} from "./quick-view.style";
+import { CloseIcon } from "assets/icons/CloseIcon";
+import { CartIcon } from "assets/icons/CartIcon";
+import { CURRENCY } from "utils/constant";
 
-import ReadMore from 'components/truncate/truncate';
-import CarouselWithCustomDots from 'components/multi-carousel/multi-carousel';
-import { useLocale } from 'contexts/language/language.provider';
-import { useCart } from 'contexts/cart/use-cart';
-import { Counter } from 'components/counter/counter';
-import { FormattedMessage } from 'react-intl';
+import ReadMore from "components/truncate/truncate";
+import CarouselWithCustomDots from "components/multi-carousel/multi-carousel";
+import { useLocale } from "contexts/language/language.provider";
+import { useCart } from "contexts/cart/use-cart";
+import { Counter } from "components/counter/counter";
+import { FormattedMessage } from "react-intl";
+import Carousel from "react-multi-carousel";
+import { VaraiantType } from "components/product-details/product-details";
 
 type QuickViewProps = {
   modalProps: any;
@@ -52,7 +53,7 @@ const QuickViewMobile: React.FunctionComponent<QuickViewProps> = ({
   deviceType,
 }) => {
   const { addItem, removeItem, isInCart, getItem } = useCart();
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<Carousel>(null);
   const {
     id,
     title,
@@ -62,37 +63,68 @@ const QuickViewMobile: React.FunctionComponent<QuickViewProps> = ({
     description,
     categories,
     image,
-    Color
+    variants,
   } = modalProps;
-
 
   const { isRtl } = useLocale();
 
-  console.log('modalProps:: ', modalProps);
-  const colorOptions = [];
-  Color.map((item, index) => {
-    const newOption = Object.assign({}, { value: item.value, label: item.value, stock: item.stock, index: index });
-    colorOptions.push(newOption);
-  });
+  const [variantOptions, setVariantOptions] = useState<VaraiantType[]>([]);
+  const [choosedVariant, setChoosedVariant] = useState<VaraiantType>({});
 
-  const [variants, setVariants] = useState(colorOptions[0]);
 
+  useEffect(() => {
+    const options = [];
+    variants.map((variant, index) => {
+      const newOption = Object.assign(
+        {},
+        {
+          value: variant.value,
+          label: variant.value,
+          stock: variant.stock,
+          index: index,
+        }
+      );
+      options.push(newOption);
+    });
+    setVariantOptions(options);
+    setChoosedVariant(options[0]);
+  }, [modalProps]);
 
   const handleAddClick = (e: any) => {
     e.stopPropagation();
-    ////TODO reformate modalProps to fit cart finished?
-    const { Color, categories, description, gallery, shortDescription, image, ...newItemWithVariant } = modalProps;
-    newItemWithVariant.variant = variants;
-    newItemWithVariant.image = image[variants.index];
-    console.log('newItemWithVariant: ', newItemWithVariant);
-    addItem(newItemWithVariant);
+    if (Object.keys(choosedVariant).length > 0) {
+      const {
+        categories,
+        description,
+        gallery,
+        shortDescription,
+        image,
+        variants,
+        ...newItemWithVariant
+      } = modalProps;
+      // newItemWithVariant.variant = choosedVariant;
+      newItemWithVariant.variant = {...choosedVariant,...variants[choosedVariant.index]};
+      newItemWithVariant.image =
+        image[image.length > 1 ? choosedVariant.index : 0];
+      console.log("newItemWithVariant: ", newItemWithVariant);
+      addItem(newItemWithVariant);
+    } else {
+      alert("Please select an option.");
+    }
   };
 
   const handleRemoveClick = (e: any) => {
     e.stopPropagation();
-    const { Color, categories, description, gallery, shortDescription, image, ...newItemWithVariant } = modalProps;
-    newItemWithVariant.variant = variants;
-    newItemWithVariant.image = image[variants.index];
+    const {
+      categories,
+      description,
+      gallery,
+      shortDescription,
+      image,
+      ...newItemWithVariant
+    } = modalProps;
+    newItemWithVariant.variant = choosedVariant;
+    newItemWithVariant.image = image[choosedVariant.index];
     removeItem(newItemWithVariant);
   };
   function onCategoryClick(slug) {
@@ -108,17 +140,21 @@ const QuickViewMobile: React.FunctionComponent<QuickViewProps> = ({
       {/* <ModalClose onClick={onModalClose}>
         <CloseIcon />
       </ModalClose> */}
-      <QuickViewWrapper className='quick-view-mobile-wrapper'>
-        <ProductDetailsWrapper className='product-card' dir='ltr'>
+      <QuickViewWrapper className="quick-view-mobile-wrapper">
+        <ProductDetailsWrapper className="product-card" dir="ltr">
           {!isRtl && (
             <ProductPreview>
-              <CarouselWithCustomDots items={image} deviceType={deviceType} ref={carouselRef} />
+              <CarouselWithCustomDots
+                items={image}
+                deviceType={deviceType}
+                ref={carouselRef}
+              />
               {!!discountInPercent && (
                 <DiscountPercent>{discountInPercent}%</DiscountPercent>
               )}
             </ProductPreview>
           )}
-          <ProductInfoWrapper dir={isRtl ? 'rtl' : 'ltr'}>
+          <ProductInfoWrapper dir={isRtl ? "rtl" : "ltr"}>
             <ProductInfo>
               <ProductTitlePriceWrapper>
                 <ProductTitle>{title}</ProductTitle>
@@ -133,31 +169,36 @@ const QuickViewMobile: React.FunctionComponent<QuickViewProps> = ({
                 <MetaSingle>
                   {categories
                     ? categories.map((item: any) => (
-                      <MetaItem
-                        onClick={() => onCategoryClick(item.slug)}
-                        key={item.id}
-                      >
-                        {item.title}
-                      </MetaItem>
-                    ))
-                    : ''}
+                        <MetaItem
+                          onClick={() => onCategoryClick(item.slug)}
+                          key={item.id}
+                        >
+                          {item.title}
+                        </MetaItem>
+                      ))
+                    : ""}
                 </MetaSingle>
               </ProductMeta>
 
               <OptionsWrapper>
-                <Select options={colorOptions}
-                  defaultValue={colorOptions[0]}
-                  onChange={(value, action) => {
-                    console.log('eee: ', value);
-                    console.log('actionsss: ', action)
+                <Select
+                  isValid={Object.keys(choosedVariant).length > 0}
+                  value={choosedVariant}
+                  options={variantOptions}
+                  onChange={(value) => {
                     if (carouselRef.current) {
-                      carouselRef.current.goToSlide(value.index);
+                      if (image.length > 1)
+                        carouselRef.current.goToSlide(value.index);
                     }
-                    setVariants(colorOptions[value.index]);
+                    setChoosedVariant(variantOptions[value.index]);
                   }}
                   menuPlacement={"top"}
                 />
-                {variants.stock <= 0 && <SoldOutSign><strong>out of stock</strong></SoldOutSign>}
+                {choosedVariant.stock <= 0 && (
+                  <SoldOutSign>
+                    <strong>out of stock</strong>
+                  </SoldOutSign>
+                )}
               </OptionsWrapper>
 
               <ProductCartWrapper>
@@ -176,29 +217,29 @@ const QuickViewMobile: React.FunctionComponent<QuickViewProps> = ({
                 </ProductPriceWrapper>
 
                 <ProductCartBtn>
-                  {!isInCart(id, variants.index) ? (
+                  {!isInCart(id, choosedVariant.index) ? (
                     <Button
-                      className='cart-button'
-                      variant='secondary'
+                      className="cart-button"
+                      variant="secondary"
                       borderRadius={100}
                       onClick={handleAddClick}
-                      disabled={variants.stock <= 0}
+                      disabled={choosedVariant.stock <= 0}
                     >
                       <CartIcon mr={2} />
                       <ButtonText>
                         <FormattedMessage
-                          id='addCartButton'
-                          defaultMessage='Cart'
+                          id="addCartButton"
+                          defaultMessage="Cart"
                         />
                       </ButtonText>
                     </Button>
                   ) : (
-                      <Counter
-                        value={getItem(id, variants.index).quantity}
-                        onDecrement={handleRemoveClick}
-                        onIncrement={handleAddClick}
-                      />
-                    )}
+                    <Counter
+                      value={getItem(id, choosedVariant.index).quantity}
+                      onDecrement={handleRemoveClick}
+                      onIncrement={handleAddClick}
+                    />
+                  )}
                 </ProductCartBtn>
               </ProductCartWrapper>
             </ProductInfo>

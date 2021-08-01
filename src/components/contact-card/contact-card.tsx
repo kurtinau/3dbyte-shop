@@ -1,16 +1,17 @@
-import React, { useContext } from 'react';
-import styled from 'styled-components';
-import { themeGet } from '@styled-system/theme-get';
-import * as Yup from 'yup';
-import { closeModal } from '@redq/reuse-modal';
-import { FormikProps, ErrorMessage, Formik, Form } from 'formik';
-import { useMutation } from '@apollo/client';
-import MaskedInput from 'react-text-mask';
-import { ProfileContext } from 'contexts/profile/profile.context';
-import { Button } from 'components/button/button';
-import { UPDATE_CONTACT } from 'graphql/mutation/contact';
-import { FieldWrapper, Heading } from './contact-card.style';
-import { FormattedMessage } from 'react-intl';
+import React, { useContext } from "react";
+import styled from "styled-components";
+import { themeGet } from "@styled-system/theme-get";
+import * as Yup from "yup";
+import { closeModal } from "@redq/reuse-modal";
+import { FormikProps, ErrorMessage, Formik, Form } from "formik";
+import { useMutation } from "@apollo/client";
+import MaskedInput from "react-text-mask";
+import { ProfileContext } from "contexts/profile/profile.context";
+import { Button } from "components/button/button";
+import { CREATE_CONTACT, UPDATE_CONTACT } from "graphql/mutation/contact";
+import { FieldWrapper, Heading } from "./contact-card.style";
+import { FormattedMessage } from "react-intl";
+import { useSession } from "next-auth/client";
 
 type Props = {
   item?: any | null;
@@ -18,28 +19,48 @@ type Props = {
 // Shape of form values
 type FormValues = {
   id?: number | null;
-  type?: string;
-  number?: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  isPrimary?: boolean;
 };
 
 const ContactValidationSchema = Yup.object().shape({
-  number: Yup.string().required('Number is required'),
+  phone: Yup.string().required("Phone is required"),
+  firstName: Yup.string().required("First Name is required"),
+  lastName: Yup.string().required("Last Name is required"),
 });
 
 const CreateOrUpdateContact: React.FC<Props> = ({ item }) => {
   const initialValues = {
     id: item.id || null,
-    type: item.type || 'secondary',
-    number: item.number || '',
+    phone: item.phone || "",
+    isPrimary: item.isPrimary || false,
+    firstName: item.firstName || "",
+    lastName: item.lastName || "",
   };
-  const [addContactMutation] = useMutation(UPDATE_CONTACT);
+  const [updateContactMutation] = useMutation(UPDATE_CONTACT);
+  const [createContactMutation] = useMutation(CREATE_CONTACT);
+  const [session] = useSession();
   const { state, dispatch } = useContext(ProfileContext);
   const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
-    await addContactMutation({
-      variables: { contactInput: JSON.stringify(values) },
-    });
-    console.log(values, 'formik values');
-    dispatch({ type: 'ADD_OR_UPDATE_CONTACT', payload: values });
+    const { id, ...partialValues } = values;
+    if (values.id) {
+      const { data } = await updateContactMutation({
+        variables: {
+          contactInput: { where: { id: id }, data: partialValues },
+        },
+        context: { headers: { Authorization: "Bearer " + session.jwt } },
+      });
+      dispatch({ type: "UPDATE_CONTACT", payload: data.updateContact.contact });
+    } else {
+      const { data } = await createContactMutation({
+        variables: { contactInput: { data: partialValues } },
+        context: { headers: { Authorization: "Bearer " + session.jwt } },
+      });
+      values.id = data.createContact.contact.id;
+      dispatch({ type: "ADD_CONTACT", payload: data.createContact.contact });
+    }
     closeModal();
     setSubmitting(false);
   };
@@ -57,22 +78,45 @@ const CreateOrUpdateContact: React.FC<Props> = ({ item }) => {
       }: FormikProps<FormValues>) => (
         <Form>
           <Heading>
-            {item && item.id ? 'Edit Contact' : 'Add New Contact'}
+            {item && item.id ? "Edit Contact" : "Add New Contact"}
           </Heading>
           <FieldWrapper>
+            <StyledInput
+              style={{ marginBottom: "5px" }}
+              placeholder="Enter First Name"
+              id="contactFirstName"
+              value={values.firstName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              name="firstName"
+              required
+            />
+            <StyledInput
+              style={{ marginBottom: "5px" }}
+              placeholder="Enter Last Name"
+              id="contactLastName"
+              value={values.lastName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              name="lastName"
+              required
+            />
             <MaskedInput
               mask={[
-                '(',
-                /[1-9]/,
+                "(",
+                "+",
+                "6",
+                "1",
+                ")",
+                " ",
                 /\d/,
                 /\d/,
-                ')',
-                ' ',
+                /\d/,
+                " ",
                 /\d/,
                 /\d/,
                 /\d/,
-                '-',
-                /\d/,
+                " ",
                 /\d/,
                 /\d/,
                 /\d/,
@@ -80,22 +124,22 @@ const CreateOrUpdateContact: React.FC<Props> = ({ item }) => {
               className="form-control"
               placeholder="Enter a phone number"
               guide={false}
-              id="my-input-id"
-              value={values.number}
+              id="contactPhone"
+              value={values.phone}
               onChange={handleChange}
               onBlur={handleBlur}
-              name="number"
+              name="phone"
               render={(ref: any, props: {}) => (
                 <StyledInput ref={ref} {...props} />
               )}
             />
           </FieldWrapper>
-          <ErrorMessage name="number" component={StyledError} />
+          <ErrorMessage name="phone" component={StyledError} />
 
           <Button
             disabled={isSubmitting}
             type="submit"
-            style={{ width: '100%', height: '44px' }}
+            style={{ width: "100%", height: "44px" }}
           >
             <FormattedMessage
               id="savedContactId"
@@ -113,13 +157,13 @@ export default CreateOrUpdateContact;
 const StyledInput = styled.input`
   width: 100%;
   height: 54px;
-  border-radius: ${themeGet('radii.base', '6px')};
-  font-family: ${themeGet('fonts.body', 'Lato, sans-serif')};
-  border: 1px solid ${themeGet('colors.gray.700', '#e6e6e6')};
-  color: ${themeGet('colors.text.bold', '#0D1136')};
+  border-radius: ${themeGet("radii.base", "6px")};
+  font-family: ${themeGet("fonts.body", "Lato, sans-serif")};
+  border: 1px solid ${themeGet("colors.gray.700", "#e6e6e6")};
+  color: ${themeGet("colors.text.bold", "#0D1136")};
   font-size: 16px;
   line-height: 19px;
-  font-weight: ${themeGet('fontWeights.regular', '400')};
+  font-weight: ${themeGet("fontWeights.regular", "400")};
   padding: 0 18px;
   box-sizing: border-box;
   transition: border-color 0.25s ease;
@@ -130,11 +174,11 @@ const StyledInput = styled.input`
   }
 
   &:focus {
-    border-color: ${themeGet('colors.primary.regular', '#009e7f')};
+    border-color: ${themeGet("colors.primary.regular", "#009e7f")};
   }
 
   &::placeholder {
-    color: ${themeGet('colors.text.regular', '#77798C')};
+    color: ${themeGet("colors.text.regular", "#77798C")};
   }
 `;
 

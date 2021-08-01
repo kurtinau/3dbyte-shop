@@ -1,24 +1,41 @@
 import { gql } from '@apollo/client';
 
 export const GET_LOGGED_IN_CUSTOMER = gql`
-  query getUser($id: ID!) {
-    user(id: $id) {
-      id
-      username
-      email
-      addresses {
+  query getMe {
+    me {
+      user{
         id
-        type
-        name
-        info
-      }
-      cards {
-        id
-        type
-        cardType
-        name
-        lastFourDigit
+        username
+        email
+        firstName
+        lastName
+        addresses {
+          id
+          line1
+          line2
+          suburb
+          state
+          postcode
+          pid
+          sla
+          isPrimary
+        }
+        cards {
+          id
+          type
+          cardType
+          name
+          lastFourDigit
+        }
+        contacts {
+          id
+          firstName
+          lastName
+          phone
+          isPrimary
+        }
       }
     }
   }
 `;
+

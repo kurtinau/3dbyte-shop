@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
-import { useMutation } from '@apollo/client';
-import { ProfileContext } from 'contexts/profile/profile.context';
+import React, { useContext } from "react";
+import { useMutation } from "@apollo/client";
+import { ProfileContext } from "contexts/profile/profile.context";
 
 import {
   SettingsForm,
@@ -9,16 +9,17 @@ import {
   Title,
   Col,
   Row,
-} from './settings.style';
+} from "./settings.style";
 
-import { Button } from 'components/button/button';
-import { Input } from 'components/forms/input';
-import { UPDATE_ME } from 'graphql/mutation/me';
-import { FormattedMessage } from 'react-intl';
-import { Label } from 'components/forms/label';
-import Contact from 'features/contact/contact';
-import Address from 'features/address/address';
-import Payment from 'features/payment/payment';
+import { Button } from "components/button/button";
+import { Input } from "components/forms/input";
+import { UPDATE_ME } from "graphql/mutation/me";
+import { FormattedMessage } from "react-intl";
+import { Label } from "components/forms/label";
+import Contact from "features/contact/contact";
+import Address from "features/address/address";
+import Payment from "features/payment/payment";
+import { useSession } from "next-auth/client";
 
 type SettingsContentProps = {
   deviceType?: {
@@ -26,30 +27,37 @@ type SettingsContentProps = {
     tablet: boolean;
     desktop: boolean;
   };
-  userId?: number
+  userId?: number;
+  token: string;
 };
 
-const SettingsContent: React.FC<SettingsContentProps> = ({ userId, deviceType }) => {
+const SettingsContent: React.FC<SettingsContentProps> = ({
+  userId,
+  deviceType,
+  token,
+}) => {
   const { state, dispatch } = useContext(ProfileContext);
   const [updateMeMutation] = useMutation(UPDATE_ME);
 
   const handleChange = (e) => {
     const { value, name } = e.target;
+    console.log('seetings input value:: ', value);
     dispatch({
-      type: 'HANDLE_ON_INPUT_CHANGE',
+      type: "HANDLE_ON_INPUT_CHANGE",
       payload: { value, field: name },
     });
   };
 
   const handleSave = async () => {
-    const { name, email } = state;
+    const { firstName, lastName } = state;
     await updateMeMutation({
       variables: {
         meInput: {
           where: { id: userId },
-          data: { username: name, email }
-        }
+          data: { firstName, lastName },
+        },
       },
+      context: { headers: { Authorization: "Bearer " + token } },
     });
   };
 
@@ -64,27 +72,69 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ userId, deviceType })
             />
           </Title>
         </HeadingSection>
-        <Row style={{ alignItems: 'flex-end', marginBottom: '50px' }}>
+        <Row style={{ alignItems: "flex-end", marginBottom: "50px" }}>
           <Col xs={12} sm={5} md={5} lg={5}>
             <Label>
               <FormattedMessage
-                id="profileNameField"
-                defaultMessage="Your Name"
+                id="profileFirstNameField"
+                defaultMessage="First Name"
               />
             </Label>
             <Input
               type="text"
-              label="Name"
-              name="username"
-              value={state.username}
+              label="firstName"
+              name="firstName"
+              value={state.firstName || ""}
               onChange={handleChange}
               backgroundColor="#F7F7F7"
               height="48px"
-            // intlInputLabelId="profileNameField"
             />
           </Col>
 
           <Col xs={12} sm={5} md={5} lg={5}>
+            <Label>
+              <FormattedMessage
+                id="profileLastNameField"
+                defaultMessage="Last Name"
+              />
+            </Label>
+            <Input
+              type="text"
+              label="lastName"
+              name="lastName"
+              value={state.lastName || ""}
+              onChange={handleChange}
+              backgroundColor="#F7F7F7"
+              height="48px"
+            />
+          </Col>
+
+          <Col xs={12} sm={2} md={2} lg={2}>
+            <Button size="big" style={{ width: "100%" }} onClick={handleSave}>
+              <FormattedMessage id="profileSaveBtn" defaultMessage="Save" />
+            </Button>
+          </Col>
+
+          <Col xs={12} sm={5} md={5} lg={5} style={{ marginTop: "10px" }}>
+            <Label>
+              <FormattedMessage
+                id="profileUsernameField"
+                defaultMessage="User Name"
+              />
+            </Label>
+            <Input
+              type="text"
+              label="username"
+              name="username"
+              value={state.username || ""}
+              backgroundColor="#F7F7F7"
+              height="48px"
+              readOnly
+              // intlInputLabelId="profileNameField"
+            />
+          </Col>
+
+          <Col xs={12} sm={5} md={5} lg={5} style={{ marginTop: "10px" }}>
             <Label>
               <FormattedMessage
                 id="profileEmailField"
@@ -95,29 +145,23 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ userId, deviceType })
               type="email"
               name="email"
               label="Email Address"
-              value={state.email}
-              onChange={handleChange}
+              value={state.email || ""}
               backgroundColor="#F7F7F7"
+              readOnly
             />
           </Col>
-
-          <Col xs={12} sm={2} md={2} lg={2}>
-            <Button size="big" style={{ width: '100%' }} onClick={handleSave}>
-              <FormattedMessage id="profileSaveBtn" defaultMessage="Save" />
-            </Button>
-          </Col>
         </Row>
-        {/* <Row>
+        <Row>
           <Col xs={12} sm={12} md={12} lg={12}>
             <SettingsFormContent>
-              <Contact />
+              <Contact token={token} />
             </SettingsFormContent>
           </Col>
-        </Row> */}
+        </Row>
         <Row>
-          <Col xs={12} sm={12} md={12} lg={12} style={{ position: 'relative' }}>
+          <Col xs={12} sm={12} md={12} lg={12} style={{ position: "relative" }}>
             <SettingsFormContent>
-              <Address />
+              <Address token={token} />
             </SettingsFormContent>
           </Col>
         </Row>

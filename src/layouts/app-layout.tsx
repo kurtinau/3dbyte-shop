@@ -6,6 +6,7 @@ import { useAppState } from 'contexts/app/app.provider';
 import Header from './header/header';
 import { LayoutWrapper } from './layout.style';
 import { isCategoryPage } from './is-home-page';
+import { MyAuthProvider } from 'contexts/auth/auth.provider';
 const MobileHeader = dynamic(() => import('./header/mobile-header'), {
   ssr: false,
 });
@@ -36,11 +37,13 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
           } desktop`}
         />
 
+        {/* <MyAuthProvider> */}
         <Header
           className={`${isSticky ? 'sticky' : 'unSticky'} ${
             isHomePage ? 'home' : ''
           }`}
         />
+        {/* </MyAuthProvider> */}
       </Sticky>
       {children}
     </LayoutWrapper>

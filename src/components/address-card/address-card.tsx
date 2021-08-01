@@ -77,6 +77,7 @@ const UpdateAddress = (props: FormikProps<FormValues> & MyFormProps) => {
     }
   };
   return (
+    <>
     <Form>
       <Heading>{item && item.id ? 'Edit Address' : 'Add New Address'}</Heading>
       <FieldWrapper>
@@ -111,6 +112,7 @@ const UpdateAddress = (props: FormikProps<FormValues> & MyFormProps) => {
         <FormattedMessage id="savedAddressId" defaultMessage="Save Address" />
       </Button>
     </Form>
+    </>
   );
 };
 

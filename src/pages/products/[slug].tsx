@@ -1,20 +1,18 @@
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { initializeApollo } from 'utils/apollo';
-import { GET_PRODUCT_DETAILS } from 'graphql/query/product.query';
-import { Modal } from '@redq/reuse-modal';
+import React from "react";
+import dynamic from "next/dynamic";
+import { initializeApollo } from "utils/apollo";
+import { GET_PRODUCT_DETAILS } from "graphql/query/product.query";
+import { Modal } from "@redq/reuse-modal";
 import ProductSingleWrapper, {
   ProductSingleContainer,
-} from 'assets/styles/product-single.style';
+} from "assets/styles/product-single.style";
+import { ModalProvider } from "contexts/modal/modal.provider";
 
 const ProductDetails = dynamic(
-  () =>
-    import(
-      'components/product-details/product-details'
-    )
+  () => import("components/product-details/product-details")
 );
 
-const CartPopUp = dynamic(() => import('features/carts/cart-popup'), {
+const CartPopUp = dynamic(() => import("features/carts/cart-popup"), {
   ssr: false,
 });
 interface Props {
@@ -28,7 +26,7 @@ export async function getServerSideProps({ params }) {
   const { data } = await apolloClient.query({
     query: GET_PRODUCT_DETAILS,
     variables: {
-      where: {slug: params.slug},
+      where: { slug: params.slug },
     },
   });
   return {
@@ -52,14 +50,16 @@ const ProductDetailsPage = ({ data, deviceType }: Props) => {
   //   );
   // }
   return (
-    <Modal>
-      <ProductSingleWrapper>
-        <ProductSingleContainer>
-          {content}
-          <CartPopUp deviceType={deviceType} />
-        </ProductSingleContainer>
-      </ProductSingleWrapper>
-    </Modal>
+    <ModalProvider>
+      <Modal>
+        <ProductSingleWrapper>
+          <ProductSingleContainer>
+            {content}
+            <CartPopUp deviceType={deviceType} />
+          </ProductSingleContainer>
+        </ProductSingleWrapper>
+      </Modal>
+    </ModalProvider>
   );
 };
 export default ProductDetailsPage;

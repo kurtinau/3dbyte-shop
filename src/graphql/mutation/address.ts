@@ -1,28 +1,62 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const UPDATE_ADDRESS = gql`
-  mutation($addressInput: String!) {
-    updateAddress(addressInput: $addressInput) {
-      id
-      name
+  mutation ($addressInput: updateAddressInput!) {
+    updateAddress(input: $addressInput) {
       address {
         id
-        name
-        info
+        line1
+        line2
+        suburb
+        state
+        postcode
+        pid
+        sla
+        isPrimary
       }
     }
   }
 `;
 export const DELETE_ADDRESS = gql`
-  mutation($addressId: String!) {
-    deleteAddress(addressId: $addressId) {
-      id
-      name
+  mutation ($input: deleteAddressInput!) {
+    deleteAddress(input: $input) {
+      address{
+        id
+      }
+    }
+  }
+`;
+
+export const CREATE_ADDRESS = gql`
+  mutation ($addressInput: createAddressInput!) {
+    createAddress(input: $addressInput) {
       address {
         id
-        name
-        info
+        line1
+        line2
+        suburb
+        state
+        postcode
+        pid
+        sla
+        isPrimary
       }
+    }
+  }
+`;
+
+export const SET_ADDRESS_PRIMARY = gql`
+  mutation ($input: deleteAddressInput!) {
+    setAddressPrimary(input: $input) {
+      id
+      line1
+      line2
+      suburb
+      state
+      postcode
+      pid
+      sla
+      isPrimary
     }
   }
 `;

@@ -165,19 +165,21 @@ const RadioCard: React.FC<RadioCardProps> = ({
         value={content}
         disabled={disabled}
         checked={checked}
-        onChange={onChange}
+        onChange={(e)=>{e.stopPropagation();onChange()
+          console.log('radio clicked...')}}
       />
+      
       {title && <CardTitle>{title}</CardTitle>}
       {content && <CardContent>{content}</CardContent>}
       {withActionButtons && (
         <CardButtons className='button-wrapper'>
           {hasEdit && (
-            <ActionButton onClick={onEdit} className='edit-btn'>
+            <ActionButton onClick={(e)=>{e.preventDefault();onEdit()}} className='edit-btn'>
               {editIcon}
             </ActionButton>
           )}
           {hasDelete && (
-            <ActionButton onClick={onDelete} className='delete-btn'>
+            <ActionButton onClick={(e)=>{e.preventDefault();onDelete()}} className='delete-btn'>
               {deleteIcon}
             </ActionButton>
           )}

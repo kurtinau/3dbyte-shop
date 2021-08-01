@@ -61,7 +61,7 @@ export default function Home({ deviceType }) {
         <SidebarWithCardMenu type={PAGE_TYPE} />
         <main>
           <Banner data={bannerSlides} />
-          <ProductGrid type={PAGE_TYPE} />
+          <ProductGrid />
         </main>
       </ContentArea>
       <CartPopUp deviceType={deviceType} />

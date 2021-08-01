@@ -2,7 +2,7 @@ import React, { forwardRef,Ref } from 'react';
 import { themeGet } from '@styled-system/theme-get';
 import Carousel from 'react-multi-carousel';
 import styled from 'styled-components';
-import {prependHostname} from 'utils/imageFormateUtil';
+import {prependHostname} from 'utils/imageFormatUtil';
 
 const SingleItem = styled.li`
   border: 1px solid ${themeGet('colors.gray.500', '#f1f1f1')};
@@ -51,7 +51,7 @@ const CarouselWithCustomDots = forwardRef(({
   title,
   deviceType: { mobile, tablet, desktop },
   ...rest
-}: any, ref: Ref<HTMLDivElement>) => {
+}: any, ref: Ref<Carousel>) => {
   const children = items.map((item: any, index: number) => (
     <img
       src={prependHostname(item.url)}

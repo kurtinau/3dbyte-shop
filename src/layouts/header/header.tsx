@@ -25,7 +25,6 @@ const Header: React.FC<Props> = ({ className }) => {
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       // localStorage.removeItem('access_token');
-      authDispatch({ type: 'SIGN_OUT' });
       // Router.push('/');
       signOut();
     }
@@ -35,7 +34,6 @@ const Header: React.FC<Props> = ({ className }) => {
     authDispatch({
       type: 'SIGNIN',
     });
-    // signIn();
 
     openModal({
       show: true,
@@ -53,7 +51,7 @@ const Header: React.FC<Props> = ({ className }) => {
     });
   };
   const showSearch = pathname === '/home';
-  const [session, loading] = useSession();
+  const [session] = useSession();
   if (session)
     console.log('header-session::: ', session);
   return (

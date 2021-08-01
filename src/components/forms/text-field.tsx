@@ -5,7 +5,8 @@ import { Input } from 'components/forms/input';
 const FieldWrapper = styled.div`
   textarea {
     height: auto;
-    min-height: 171px;
+    width: 100%;
+    min-height: 90px;
     padding-top: 15px;
     resize: none;
   }

@@ -73,23 +73,37 @@ export const GET_PRODUCT_DETAILS = gql`
       shortDescription
       description
       discountInPercent
+      weight
+        length_
+        width
+        height
       gallery {
         url
         formats
-      }
-      Color{
-        id
-        value
-        stock
-        Image{
-          url
-          formats
-        }
       }
       categories {
         id
         slug
         title
+      }
+      variants{
+        __typename
+        ... on ComponentVariantColor{
+          value
+          stock
+          image {
+            url
+            formats
+          }
+        }
+        ... on ComponentVariantSize{
+          value
+          width
+          length_
+          height
+          weight
+          stock
+        }
       }
     }
   }

@@ -43,8 +43,6 @@ export default function SignInModal() {
 
   const loginCallback = () => {
     if (typeof window !== 'undefined') {
-      // localStorage.setItem('access_token', `${email}.${password}`);
-      authDispatch({ type: 'SIGNIN_SUCCESS' });
       signIn('email', { email });
       closeModal();
     }

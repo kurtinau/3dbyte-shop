@@ -20,7 +20,6 @@ import { useEffect } from 'react';
 
 /**
  * //TODO: 
- * 1.delete contact section
  * 2.change delivery address input form
  * 3.give info to customer if there is no card existed.
  * 
@@ -36,14 +35,13 @@ type Props = {
   };
 };
 const ProfilePage = ({ deviceType, session }) => {
-  useEffect(()=>{
-  },[session]);
   if (!session) {
     return <Error statusCode={403} />
   }
+  console.log('profile session:: ',session);
 
   const { data, error, loading } = useQuery(GET_LOGGED_IN_CUSTOMER, {
-    variables: { id: session ? session.id : 0 },
+    context: { headers: { "Authorization": "Bearer "+session.jwt }},
     skip: !session,
   });
   console.log('profile::::data: ', data);
@@ -54,14 +52,14 @@ const ProfilePage = ({ deviceType, session }) => {
   return (
     <>
       <SEO title="Profile - PickBazar" description="Profile Details" />
-      <ProfileProvider initData={data.user}>
+      <ProfileProvider initData={data.me.user}>
         <Modal>
           <PageWrapper>
             <SidebarSection>
               <Sidebar />
             </SidebarSection>
             <ContentBox>
-              <SettingsContent deviceType={deviceType} userId = {session.id}/>
+              <SettingsContent deviceType={deviceType} userId = {session.id} token={session.jwt}/>
             </ContentBox>
 
             <Footer />
@@ -83,4 +81,3 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 };
 
 export default ProfilePage;
-

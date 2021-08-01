@@ -5,8 +5,8 @@ export const UPDATE_ME = gql`
     updateUser(input: $meInput) {
       user{
         id
-        username
-        email
+        firstName
+        lastName
       }
     }
   }
